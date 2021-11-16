@@ -413,39 +413,36 @@ model = xgb.train(
     evals=[(dval, "Val")],
     early_stopping_rounds=10
 )
-
 ########################
 #TUNED MODEL EVALUATION#
 ########################
-#evaluation
-predictions = model.predict(xval)
 # make predictions for test data
-
-# evaluate predictions
-print('R2 Value:',metrics.r2_score(np.exp(y_validate), np.exp(predictions)))
-#print('Accuracy',100- (np.mean(np.abs((y_test - predictions) / y_test)) * 100))
-
+predictions = model.predict(xval)
+#feature importance
 plot_importance(model)
 pyplot.show()
-
+#pseudo residuals
 pseudo_resi = np.exp(y_validate) - np.exp(predictions)
-y_test_iden = np.exp(y_validate)
+#y validation identity
+y_val_iden = np.exp(y_validate)
+#prediction identity
 prediction_iden = np.exp(predictions)
-
-
-plt.figure(figsize= (20,15)).suptitle('GBM predictions & true value (N=2087)')
-plt.scatter(prediction_iden, y_test_iden)
+#pseudo r^2
+print('R2 Value:',metrics.r2_score(y_val_iden, prediction_iden))
+#predictions vs. true values
+plt.figure(figsize= (20,15)).suptitle('GBM predictions & true value')
+plt.scatter(y_val_iden,prediction_iden)
 plt.show()
-
+#distribution of predictions
 plt.figure(figsize= (20,15))
-sns.displot(data =np.exp(predictions), kde=True)
+sns.displot(data = prediction_iden, kde=True)
 plt.show()
-
+#distribution of true values
 plt.figure(figsize= (20,15))
-sns.displot(data = np.exp(y_test), kde=True)
+sns.displot(data = y_val_iden, kde=True)
 plt.show()
-
+#pseudo residual plot
 plt.figure(figsize= (20,15)).suptitle('GBM predictions & true value (N=2087)')
-plt.scatter(y_test_iden, pseudo_resi)
+plt.scatter(y_val_iden, pseudo_resi)
 plt.show()
 
